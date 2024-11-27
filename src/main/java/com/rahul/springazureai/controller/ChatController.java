@@ -1,4 +1,5 @@
 package com.rahul.springazureai.controller;
+
 import org.springframework.core.io.ByteArrayResource;
 import com.azure.ai.openai.OpenAIClientBuilder;
 import com.azure.core.credential.AzureKeyCredential;
@@ -15,6 +16,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -25,8 +27,6 @@ import java.util.logging.Logger;
 @CrossOrigin(origins = "https://delightful-tree-058892c0f.5.azurestaticapps.net/")
 @RequestMapping("/api/v1")
 public class ChatController {
-
-
 
     private final AzureOpenAiChatModel chatModel;
     private final AzureOpenAiImageModel imageModel;
@@ -42,10 +42,23 @@ public class ChatController {
         this.chatModel = chatModel;
         this.imageModel = imageModel;
 
+        String whisperApiKey = System.getenv("AZURE_OPENAI_WHISPER_KEY");
+        String whisperEndpoint = System.getenv("AZURE_OPENAI_WHISPER_ENDPOINT");
+
+        // Log and throw exception if environment variables are not set
+        if (whisperApiKey == null || whisperApiKey.isEmpty()) {
+            logger.severe("AZURE_OPENAI_WHISPER_KEY environment variable is missing.");
+            throw new RuntimeException("AZURE_OPENAI_WHISPER_KEY is required but not found.");
+        }
+        if (whisperEndpoint == null || whisperEndpoint.isEmpty()) {
+            logger.severe("AZURE_OPENAI_WHISPER_ENDPOINT environment variable is missing.");
+            throw new RuntimeException("AZURE_OPENAI_WHISPER_ENDPOINT is required but not found.");
+        }
+
         try {
             var openAIClient = new OpenAIClientBuilder()
-                    .credential(new AzureKeyCredential(System.getenv("AZURE_OPENAI_WHISPER_KEY")))
-                    .endpoint(System.getenv("AZURE_OPENAI_WHISPER_ENDPOINT"))
+                    .credential(new AzureKeyCredential(whisperApiKey))
+                    .endpoint(whisperEndpoint)
                     .buildClient();
 
             AzureOpenAiAudioTranscriptionOptions azureOpenAiAudioTranscriptionOptions = new AzureOpenAiAudioTranscriptionOptions();
@@ -65,6 +78,15 @@ public class ChatController {
         if (message == null || message.trim().isEmpty()) {
             throw new ResourceNotFoundException("Message is required for generating response");
         }
+
+        // Ensure API key is available
+        String azureApiKey = System.getenv("AZURE_OPENAI_KEY");
+        if (azureApiKey == null || azureApiKey.isEmpty()) {
+            logger.severe("AZURE_OPENAI_KEY environment variable is missing.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "API key for Azure OpenAI is missing."));
+        }
+
         try {
             logger.info("Generating text for message: " + message);
             Map<String, String> generation = Map.of("generation", this.chatModel.call(message));
@@ -75,13 +97,13 @@ public class ChatController {
         }
     }
 
-
     @CrossOrigin(origins = "https://delightful-tree-058892c0f.5.azurestaticapps.net/")
     @GetMapping("/generate-image")
     public ResponseEntity<ImageResponse> generateImage(@RequestParam String message) {
         if (message == null || message.trim().isEmpty()) {
             throw new ResourceNotFoundException("Message is required for generating image");
         }
+
         try {
             logger.info("Generating image for message: " + message);
             ImageResponse response = imageModel.call(new ImagePrompt(message, imageOptions));
@@ -95,11 +117,11 @@ public class ChatController {
     @CrossOrigin(origins = "https://delightful-tree-058892c0f.5.azurestaticapps.net/")
     @GetMapping("/transcribe")
     public ResponseEntity<String> getText(@RequestParam MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new ResourceNotFoundException("Audio file is required for transcription");
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Audio file is required for transcription.");
         }
         try {
-            // Convert MultipartFile to a ByteArrayResource
+            // Convert MultipartFile to ByteArrayResource
             ByteArrayResource resource = new ByteArrayResource(file.getBytes());
 
             // Call the transcription model with the resource
@@ -112,17 +134,15 @@ public class ChatController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error reading the audio file.");
         } catch (Exception e) {
             logger.severe("Error during transcription: " + e.getMessage());
-            logger.severe(Arrays.toString(e.getStackTrace()));  // Log stack trace for debugging
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Transcription failed.");
         }
     }
 
-
     @CrossOrigin(origins = "https://delightful-tree-058892c0f.5.azurestaticapps.net/")
     @PostMapping("/send-MultiLangAudio")
     public ResponseEntity<String> audioTranscribe(@RequestParam MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new ResourceNotFoundException("Audio file is required for transcription");
+        if (file == null || file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Audio file is required for transcription.");
         }
         try {
             File tempfile = File.createTempFile("audio", ".wav");
