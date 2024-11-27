@@ -1,4 +1,4 @@
-name: Build and deploy JAR app to Azure Web App - spring-Ai
+name: Build and deploy JAR app to Azure Web App - rahulpannati
 
 on:
   push:
@@ -11,22 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the code
       - uses: actions/checkout@v4
 
+      # Step 2: Set up Java version
       - name: Set up Java version
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'microsoft'
 
-      - name: Set environment variables
-        run: |
-          echo "AZURE_OPENAI_WHISPER_KEY=${{ secrets.AZURE_OPENAI_WHISPER_KEY }}" >> $GITHUB_ENV
-          echo "AZURE_OPENAI_WHISPER_ENDPOINT=${{ secrets.AZURE_OPENAI_WHISPER_ENDPOINT }}" >> $GITHUB_ENV
-
+      # Step 3: Build the project with Maven (skip tests for faster build)
       - name: Build with Maven (skip tests)
-        run: mvn clean install -DskipTests  # Skipping tests during build
+        run: mvn clean install -DskipTests
 
+      # Step 4: Upload the built JAR as an artifact for the deploy job
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -40,25 +39,37 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write # This is required for requesting the JWT
+      id-token: write  # This is required for requesting the JWT
 
     steps:
+      # Step 1: Download the artifact produced in the build job
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: java-app
 
+      # Step 2: Login to Azure using the Service Principal
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_12CE226ECFA1430DB1C20D11790497E3 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BC0D1F34F3C34D6FBCA584942C537E03 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_784E1B5506A84D0299A1ECA6BF7C659F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
+      # Step 3: Set the Azure subscription to use
+      - name: Set Azure Subscription
+        run: |
+          az account set --subscription ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
+
+      # Step 4: Deploy the JAR file to the Azure Web App
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'spring-Ai'
+          app-name: 'rahulpannati'  # Ensure this is the correct Azure Web App name
           slot-name: 'Production'
-          package: '*.jar'
+          package: 'target/*.jar'  # Path to your built JAR file (ensure it matches the build output)
+          
+      # Optional: Post-deployment success URL (can be used to get the webapp URL after deployment)
+      - name: Output Web App URL
+        run: echo "Web App URL: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
