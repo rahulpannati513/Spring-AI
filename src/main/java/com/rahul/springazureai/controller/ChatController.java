@@ -160,6 +160,7 @@ public class ChatController {
                   The cuisine type I prefer is {cuisine}.
                   Please consider the following dietary restrictions: {dietaryRestrictions}.
                   Please provide me with a detailed recipe including title, list of ingredients, and cooking instructions.
+                  Make sure you give me these details in json format.
                   """;
 
             PromptTemplate promptTemplate = new PromptTemplate(template);
