@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:5175")
+@CrossOrigin(origins = "https://rahulpannati-bgdmdhdycnbshjee.eastus2-01.azurewebsites.net/")
 @RequestMapping("/api/v1")
 public class ChatController {
 
@@ -59,7 +59,7 @@ public class ChatController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:5175")
+    @CrossOrigin(origins = "https://victorious-mud-0ef70881e.5.azurestaticapps.net")
     @GetMapping("/chat")
     public ResponseEntity<Map<String, String>> generate(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
         if (message == null || message.trim().isEmpty()) {
@@ -76,7 +76,7 @@ public class ChatController {
     }
 
 
-    @CrossOrigin(origins = "http://localhost:5175")
+    @CrossOrigin(origins = "https://victorious-mud-0ef70881e.5.azurestaticapps.net")
     @GetMapping("/generate-image")
     public ResponseEntity<ImageResponse> generateImage(@RequestParam String message) {
         if (message == null || message.trim().isEmpty()) {
@@ -92,7 +92,7 @@ public class ChatController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:5175")
+    @CrossOrigin(origins = "https://victorious-mud-0ef70881e.5.azurestaticapps.net")
     @GetMapping("/transcribe")
     public ResponseEntity<String> getText(@RequestParam MultipartFile file) {
         if (file.isEmpty()) {
@@ -118,7 +118,7 @@ public class ChatController {
     }
 
 
-    @CrossOrigin(origins = "http://localhost:5175")
+    @CrossOrigin(origins = "https://victorious-mud-0ef70881e.5.azurestaticapps.net")
     @PostMapping("/send-MultiLangAudio")
     public ResponseEntity<String> audioTranscribe(@RequestParam MultipartFile file) {
         if (file.isEmpty()) {
@@ -145,7 +145,7 @@ public class ChatController {
         }
     }
 
-    @CrossOrigin(origins = "http://localhost:5175")
+    @CrossOrigin(origins = "https://victorious-mud-0ef70881e.5.azurestaticapps.net")
     @GetMapping("/get-recipe")
     public ResponseEntity<String> getRecipe(@RequestParam(defaultValue = "any") String cuisine,
                                             @RequestParam String ingredients,
