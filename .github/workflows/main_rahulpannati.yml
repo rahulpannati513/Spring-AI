@@ -60,4 +60,5 @@ jobs:
         with:
           app-name: 'rahulpannati'  # Ensure this is the correct Azure Web App name
           slot-name: 'Production'
-          package: 'target/*.jar'  # Specify the correct path to the JAR file
+          package: '${{ github.workspace }}/target/*.jar'  # Adjust this path
+
