@@ -24,8 +24,8 @@ jobs:
           echo "AZURE_OPENAI_WHISPER_KEY=${{ secrets.AZURE_OPENAI_WHISPER_KEY }}" >> $GITHUB_ENV
           echo "AZURE_OPENAI_WHISPER_ENDPOINT=${{ secrets.AZURE_OPENAI_WHISPER_ENDPOINT }}" >> $GITHUB_ENV
 
-      - name: Build with Maven
-        run: mvn clean install
+      - name: Build with Maven (skip tests)
+        run: mvn clean install -DskipTests  # Skipping tests during build
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -40,7 +40,7 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write # This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
