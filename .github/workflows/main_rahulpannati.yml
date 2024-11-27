@@ -20,7 +20,7 @@ jobs:
           distribution: 'microsoft'
 
       - name: Build with Maven (skip tests)
-        run: mvn clean install -DskipTests  # Add the -DskipTests flag to skip tests
+        run: mvn clean install -DskipTests  # Skip tests during the build
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
@@ -35,7 +35,7 @@ jobs:
       name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write # This is required for requesting the JWT
+      id-token: write  # This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
@@ -50,10 +50,14 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_D4740665666742338C1C8EF6A1D13BAB }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2490560585CE40CA82BB289416EC27A1 }}
 
+      - name: Set Azure Subscription
+        run: |
+          az account set --subscription ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_2490560585CE40CA82BB289416EC27A1 }}
+
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: 'rahulpannati'
+          app-name: 'rahulpannati'  # Ensure this is the correct Azure Web App name
           slot-name: 'Production'
-          package: '*.jar'
+          package: 'target/*.jar'  # Specify the correct path to the JAR file
