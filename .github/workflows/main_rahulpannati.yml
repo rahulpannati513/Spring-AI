@@ -22,6 +22,9 @@ jobs:
       - name: Build with Maven (skip tests)
         run: mvn clean install -DskipTests  # Skip tests during the build
 
+      - name: List contents of target directory
+        run: ls -al target/  # Check if the JAR is being generated correctly
+
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -60,5 +63,4 @@ jobs:
         with:
           app-name: 'rahulpannati'  # Ensure this is the correct Azure Web App name
           slot-name: 'Production'
-          package: '${{ github.workspace }}/target/*.jar'  # Adjust this path
-
+          package: '${{ github.workspace }}/java-app/*.jar'  # Ensure correct path to JAR file

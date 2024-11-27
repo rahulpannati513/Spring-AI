@@ -25,7 +25,13 @@ jobs:
       - name: Build with Maven (skip tests)
         run: mvn clean install -DskipTests
 
+<<<<<<< HEAD
       # Step 4: Upload artifact for deployment job
+=======
+      - name: List contents of target directory
+        run: ls -al target/  # Verify if the JAR file is being generated correctly
+
+>>>>>>> 146c0eb (vvjjd)
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -48,7 +54,13 @@ jobs:
         with:
           name: java-app
 
+<<<<<<< HEAD
       # Step 2: Login to Azure using the Service Principal
+=======
+      - name: List contents of downloaded artifact
+        run: ls -al ${{ github.workspace }}/java-app/  # Verify if the JAR file is downloaded correctly
+
+>>>>>>> 146c0eb (vvjjd)
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -66,6 +78,7 @@ jobs:
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
+<<<<<<< HEAD
           app-name: 'rahulpannati'  # Ensure this is the correct Azure Web App name
           slot-name: 'Production'
           package: 'target/*.jar'  # Path to your built JAR file (ensure it matches the build output)
@@ -73,3 +86,8 @@ jobs:
       # Optional: Post-deployment success URL (can be used to get the webapp URL after deployment)
       - name: Output Web App URL
         run: echo "Web App URL: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
+=======
+          app-name: 'spring-Ai'  # Ensure this is the correct Azure Web App name
+          slot-name: 'Production'
+          package: '${{ github.workspace }}/java-app/*.jar'  # Ensure correct path to JAR file
+>>>>>>> 146c0eb (vvjjd)
