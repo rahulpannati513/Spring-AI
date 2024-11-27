@@ -25,7 +25,7 @@ jobs:
       - name: Build with Maven (skip tests)
         run: mvn clean install -DskipTests
 
-      # Step 4: Upload the built JAR as an artifact for the deploy job
+      # Step 4: Upload artifact for deployment job
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -42,7 +42,7 @@ jobs:
       id-token: write  # This is required for requesting the JWT
 
     steps:
-      # Step 1: Download the artifact produced in the build job
+      # Step 1: Download artifact from build job
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
@@ -61,7 +61,7 @@ jobs:
         run: |
           az account set --subscription ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
 
-      # Step 4: Deploy the JAR file to the Azure Web App
+      # Step 4: Deploy to Azure Web App
       - name: Deploy to Azure Web App
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
@@ -69,7 +69,7 @@ jobs:
           app-name: 'rahulpannati'  # Ensure this is the correct Azure Web App name
           slot-name: 'Production'
           package: 'target/*.jar'  # Path to your built JAR file (ensure it matches the build output)
-          
+
       # Optional: Post-deployment success URL (can be used to get the webapp URL after deployment)
       - name: Output Web App URL
         run: echo "Web App URL: ${{ steps.deploy-to-webapp.outputs.webapp-url }}"
